@@ -91,9 +91,9 @@ const handleLogin = async () => {
     })
 
     if (response.status === 200) {
-      localStorage.setItem('token', response.data.access_token)
-      localStorage.setItem('username', response.data.username)
-      localStorage.setItem('role', response.data.role)
+      localStorage.setItem('token', response.data.data.access_token)
+      localStorage.setItem('username', response.data.data.username)
+      localStorage.setItem('role', response.data.data.role)
 
       router.push('/dashboard')
     }

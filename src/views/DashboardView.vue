@@ -130,9 +130,12 @@ const router = useRouter();
 const token = ref("");
 
 onMounted(() => {
-  token.value = localStorage.getItem("token");
-  if (!token.value) {
+  const storedToken = localStorage.getItem("token");
+  if (!storedToken || storedToken === "undefined" || storedToken === "null") {
+    token.value = "";
     router.push("/");
+  } else {
+    token.value = storedToken;
   }
 });
 </script>

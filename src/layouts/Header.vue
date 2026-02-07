@@ -91,7 +91,10 @@ const logout = () => {
 };
 
 onMounted(() => {
-  username.value = localStorage.getItem("username");
+  const storedUsername = localStorage.getItem("username");
+  if (storedUsername && storedUsername !== "undefined" && storedUsername !== "null") {
+    username.value = storedUsername;
+  }
 });
 </script>
 

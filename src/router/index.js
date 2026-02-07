@@ -19,6 +19,12 @@ const router = createRouter({
       name: 'places',
       component: () => import('../views/PlacesView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/menus',
+      name: 'menus',
+      component: () => import('../views/MenusView.vue'),
+      meta: { requiresAuth: true }
     }
   ],
 })

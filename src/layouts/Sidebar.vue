@@ -33,12 +33,13 @@
       >
         <i class="fas fa-clipboard-list me-2"></i>Orders
       </a>
-      <a
-        href="#"
+      <router-link
+        to="/menus"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-book-open me-2"></i>Menus
-      </a>
+      </router-link>
       <a
         href="#"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
