@@ -31,7 +31,7 @@ const toggleSidebar = () => {
 }
 
 #wrapper {
-  overflow-x: hidden;
+  overflow-x: clip;
   background-color: #f5f6fa;
   min-height: 100vh;
 }

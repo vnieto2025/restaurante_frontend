@@ -69,12 +69,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useAuthStore } from "../stores/auth.js";
 
 const router = useRouter();
 const route = useRoute();
-const username = ref("");
+const authStore = useAuthStore();
+
+const username = computed(() => authStore.username);
 
 // Simple logic to determine page title from route name
 const pageTitle = computed(() => {
@@ -85,17 +88,9 @@ const pageTitle = computed(() => {
 });
 
 const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("username");
+  authStore.logout();
   router.push("/");
 };
-
-onMounted(() => {
-  const storedUsername = localStorage.getItem("username");
-  if (storedUsername && storedUsername !== "undefined" && storedUsername !== "null") {
-    username.value = storedUsername;
-  }
-});
 </script>
 
 <style scoped>

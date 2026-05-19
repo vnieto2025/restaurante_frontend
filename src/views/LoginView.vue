@@ -61,12 +61,13 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
 import loginImage from '../assets/login-illustration.png'
 import { useRouter } from 'vue-router'
-import apiUrl from "../../config.js";
+import { useAuthStore } from '../stores/auth.js'
 
 const router = useRouter()
+const authStore = useAuthStore()
+
 const username = ref('')
 const password = ref('')
 const rememberMe = ref(false)
@@ -78,26 +79,8 @@ const handleLogin = async () => {
   errorMessage.value = ''
   
   try {
-    const response = await axios.post(
-      `${apiUrl}/auth/login`, 
-    {
-      username: username.value,
-      password: password.value
-    },
-    {
-      headers: {
-        'Accept': 'application/json'
-      }
-    })
-
-    if (response.status === 200) {
-      localStorage.setItem('token', response.data.data.access_token)
-      localStorage.setItem('username', response.data.data.username)
-      localStorage.setItem('role', response.data.data.role)
-
-      router.push('/dashboard')
-    }
-    
+    await authStore.login({ username: username.value, password: password.value })
+    router.push('/dashboard')
   } catch (error) {
     if (error.response && error.response.status === 401) {
       errorMessage.value = error?.response?.data?.message || 'Invalid username or password.'

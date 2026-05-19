@@ -1,296 +1,244 @@
-<template>
+﻿<template>
   <MainLayout>
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="fw-bold text-dark">Menus</h3>
-      <button 
-        class="btn btn-primary bg-custom-blue border-0 px-4 py-2" 
-        data-bs-toggle="modal" 
-        data-bs-target="#addMenuModal"
-      >
-        Add New Menu
-      </button>
-    </div>
+    <h3 class="fw-bold mb-4">Menus</h3>
 
-    <!-- Filter Section -->
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-body">
-        <div class="row g-3 align-items-center">
-          <div class="col-md-4">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Search by name"
-              v-model="filters.name"
-            />
-          </div>
-          <div class="col-md-3">
-             <select class="form-select text-muted" v-model="filters.status">
-                <option value="">Select Status</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-             </select>
-          </div>
-          <div class="col-md-3">
-               <!-- Placeholder for another filter or empty -->
-          </div>
-          <div class="col-md-2 d-flex gap-2">
-            <button class="btn btn-search text-white flex-grow-1">Search</button>
-            <button class="btn btn-light flex-grow-1" @click="resetFilters">Reset</button>
-          </div>
-        </div>
+    <ul class="nav nav-tabs mb-4">
+      <li class="nav-item">
+        <button class="nav-link" :class="{ active: activeTab === 'categories' }" @click="activeTab = 'categories'">Categories</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" :class="{ active: activeTab === 'items' }" @click="activeTab = 'items'">Items</button>
+      </li>
+    </ul>
+
+    <!-- CATEGORIES -->
+    <div v-if="activeTab === 'categories'">
+      <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary bg-custom-blue" data-bs-toggle="modal" data-bs-target="#addCatModal">Add Category</button>
       </div>
-    </div>
-
-    <!-- Table Section -->
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light">
-              <tr>
-                <th class="ps-4 py-3 border-0 text-muted text-uppercase small fw-bold">PDF</th>
-                <th class="py-3 border-0 text-muted text-uppercase small fw-bold">Title</th>
-                <th class="py-3 border-0 text-muted text-uppercase small fw-bold">Description</th>
-                <th class="py-3 border-0 text-muted text-uppercase small fw-bold">Status</th>
-                <th class="py-3 border-0 text-muted text-uppercase small fw-bold text-end pe-5">Actions</th>
-              </tr>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div v-if="menusStore.isLoading" class="text-center p-4"><div class="spinner-border text-primary"></div></div>
+          <table v-else class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr><th>#</th><th>Name</th><th>Description</th><th>Sort</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
-              <tr v-for="menu in menus" :key="menu.id">
-                <td class="ps-4">
-                    <i class="far fa-file-pdf text-primary fs-5" title="View PDF"></i>
-                </td>
-                <td class="fw-bold">{{ menu.title }}</td>
-                <td class="text-muted">{{ menu.description }}</td>
-                <td>
-                  <span 
-                    class="badge rounded-pill px-3 py-2"
-                    :class="menu.status === 'Active' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'"
-                  >
-                    {{ menu.status }}
-                  </span>
-                </td>
-                <td class="text-end pe-4">
-                  <div class="d-flex gap-2 justify-content-end">
-                      <button class="btn btn-sm text-secondary" title="Edit">
-                        <i class="far fa-edit fa-lg"></i>
-                      </button>
-                      <button class="btn btn-sm text-danger" title="Delete">
-                        <i class="far fa-trash-alt fa-lg"></i>
-                      </button>
-                      <button class="btn btn-sm text-secondary" title="Inventory">
-                        <i class="fas fa-box fa-lg"></i>
-                      </button>
-                       <button class="btn btn-sm text-secondary" title="Details">
-                        <i class="fas fa-list fa-lg"></i>
-                      </button>
-                       <button class="btn btn-sm text-secondary" title="View">
-                        <i class="far fa-eye fa-lg"></i>
-                      </button>
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="menus.length === 0">
-                 <td colspan="5" class="text-center py-4 text-muted">No menus found</td>
+              <tr v-if="menusStore.categories.length === 0"><td colspan="6" class="text-center py-4 text-muted">No categories found.</td></tr>
+              <tr v-for="(c, i) in menusStore.categories" :key="c.id">
+                <td>{{ i + 1 }}</td>
+                <td>{{ c.name }}</td>
+                <td>{{ c.description || '—' }}</td>
+                <td>{{ c.sort_order }}</td>
+                <td><span :class="c.status == 1 ? 'badge bg-success' : 'badge bg-secondary'">{{ c.status == 1 ? 'Active' : 'Inactive' }}</span></td>
+                <td><button class="btn btn-sm btn-outline-primary" @click="openEditCat(c)"><i class="fas fa-edit"></i></button></td>
               </tr>
             </tbody>
           </table>
-          <!-- Pagination (Mockup) -->
-          <div class="d-flex justify-content-end align-items-center p-3 border-top">
-              <span class="text-muted small me-3">Rows per page: 10 <i class="fas fa-chevron-down ms-1"></i></span>
-              <span class="text-muted small me-3">1-{{ menus.length }} of {{ menus.length }}</span>
-              <div class="btn-group">
-                  <button class="btn btn-sm btn-light border-0"><i class="fas fa-chevron-left text-muted"></i></button>
-                  <button class="btn btn-sm btn-light border-0"><i class="fas fa-chevron-right text-muted"></i></button>
-              </div>
-          </div>
         </div>
       </div>
     </div>
 
-    <!-- Add New Menu Modal -->
-    <div class="modal fade" id="addMenuModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-          <div class="modal-header border-0 pb-0">
-            <h5 class="modal-title fw-bold">Add New Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body p-4">
-            <form>
-              <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted">Language</label>
-                  <select class="form-select" v-model="newMenu.language">
-                    <option value="" disabled selected>Select Language</option>
-                    <option value="en">English</option>
-                    <option value="es">Spanish</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted">Status <span class="text-danger">*</span></label>
-                  <select class="form-select" v-model="newMenu.status">
-                    <option value="" disabled selected>Select Status</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted">Title</label>
-                  <input type="text" class="form-control" placeholder="Menu Title" v-model="newMenu.title">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted">Description</label>
-                  <input type="text" class="form-control" placeholder="Menu Description" v-model="newMenu.description">
-                </div>
-              </div>
-
-              <div class="row g-3 mb-3">
-                 <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted">Restaurant</label>
-                  <input type="text" class="form-control" value="Hotel Resort Ejemplo" disabled readonly>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted">Start Time</label>
-                  <input type="text" class="form-control" placeholder="12:30 p.m." v-model="newMenu.startTime">
-                </div>
-              </div>
-               
-               <div class="row g-3">
-                 <div class="col-md-6">
-                  <label class="form-label fw-bold small text-muted">End Time</label>
-                  <input type="text" class="form-control" placeholder="12:30 p.m." v-model="newMenu.endTime">
-                </div>
-              </div>
-
-            </form>
-          </div>
-          <div class="modal-footer border-0 pt-0 px-4 pb-4">
-             <button type="button" class="btn btn-light text-secondary fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
-             <button type="button" class="btn btn-primary bg-custom-blue px-5" @click="addMenu">Add</button>
-          </div>
+    <!-- ITEMS -->
+    <div v-if="activeTab === 'items'">
+      <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary bg-custom-blue" data-bs-toggle="modal" data-bs-target="#addItemModal">Add Item</button>
+      </div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div v-if="menusStore.isLoading" class="text-center p-4"><div class="spinner-border text-primary"></div></div>
+          <table v-else class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr><th>#</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr v-if="menusStore.items.length === 0"><td colspan="6" class="text-center py-4 text-muted">No items found.</td></tr>
+              <tr v-for="(it, i) in menusStore.items" :key="it.id">
+                <td>{{ i + 1 }}</td>
+                <td>{{ it.name }}</td>
+                <td>{{ it.category || '—' }}</td>
+                <td>${{ Number(it.price).toFixed(2) }}</td>
+                <td><span :class="it.status == 1 ? 'badge bg-success' : 'badge bg-secondary'">{{ it.status == 1 ? 'Active' : 'Inactive' }}</span></td>
+                <td><button class="btn btn-sm btn-outline-primary" @click="openEditItem(it)"><i class="fas fa-edit"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCatModal" tabindex="-1">
+      <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Add Category</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Name *</label><input type="text" class="form-control" v-model="addCatForm.name" /></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" v-model="addCatForm.description" rows="2"></textarea></div>
+          <div class="mb-3"><label class="form-label">Sort Order</label><input type="number" class="form-control" v-model="addCatForm.sort_order" /></div>
+          <div v-if="addCatError" class="alert alert-danger">{{ addCatError }}</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary bg-custom-blue" @click="submitAddCat" :disabled="menusStore.isSubmitting">Save</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCatModal" tabindex="-1">
+      <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Edit Category</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Name *</label><input type="text" class="form-control" v-model="editCatForm.name" /></div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" v-model="editCatForm.description" rows="2"></textarea></div>
+          <div class="mb-3"><label class="form-label">Sort Order</label><input type="number" class="form-control" v-model="editCatForm.sort_order" /></div>
+          <div class="mb-3"><label class="form-label">Status</label><select class="form-select" v-model="editCatForm.status"><option :value="1">Active</option><option :value="0">Inactive</option></select></div>
+          <div v-if="editCatError" class="alert alert-danger">{{ editCatError }}</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary bg-custom-blue" @click="submitEditCat" :disabled="menusStore.isSubmitting">Update</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div class="modal fade" id="addItemModal" tabindex="-1">
+      <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Add Menu Item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Name *</label><input type="text" class="form-control" v-model="addItemForm.name" /></div>
+          <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select class="form-select" v-model="addItemForm.category_id">
+              <option value="">None</option>
+              <option v-for="c in menusStore.categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" v-model="addItemForm.description" rows="2"></textarea></div>
+          <div class="mb-3"><label class="form-label">Price</label><input type="number" step="0.01" class="form-control" v-model="addItemForm.price" /></div>
+          <div v-if="addItemError" class="alert alert-danger">{{ addItemError }}</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary bg-custom-blue" @click="submitAddItem" :disabled="menusStore.isSubmitting">Save</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div class="modal fade" id="editItemModal" tabindex="-1">
+      <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Edit Menu Item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label">Name *</label><input type="text" class="form-control" v-model="editItemForm.name" /></div>
+          <div class="mb-3">
+            <label class="form-label">Category</label>
+            <select class="form-select" v-model="editItemForm.category_id">
+              <option value="">None</option>
+              <option v-for="c in menusStore.categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" v-model="editItemForm.description" rows="2"></textarea></div>
+          <div class="mb-3"><label class="form-label">Price</label><input type="number" step="0.01" class="form-control" v-model="editItemForm.price" /></div>
+          <div class="mb-3"><label class="form-label">Status</label><select class="form-select" v-model="editItemForm.status"><option :value="1">Active</option><option :value="0">Inactive</option></select></div>
+          <div v-if="editItemError" class="alert alert-danger">{{ editItemError }}</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary bg-custom-blue" @click="submitEditItem" :disabled="menusStore.isSubmitting">Update</button>
+        </div>
+      </div></div>
+    </div>
   </MainLayout>
 </template>
 
 <script setup>
-import MainLayout from "../layouts/MainLayout.vue";
-import { ref } from "vue";
+import { ref, onMounted, watch } from 'vue'
+import MainLayout from '../layouts/MainLayout.vue'
+import { useMenusStore } from '../stores/menus.js'
+import { Modal } from 'bootstrap'
 
-const filters = ref({
-    name: '',
-    status: ''
-});
+const menusStore = useMenusStore()
+const activeTab  = ref('categories')
 
-const resetFilters = () => {
-    filters.value.name = '';
-    filters.value.status = '';
-};
+function closeModal(id) {
+  const el = document.getElementById(id)
+  if (!el) return
+  Modal.getOrCreateInstance(el).hide()
+  el.addEventListener('hidden.bs.modal', () => {
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove())
+    document.body.classList.remove('modal-open')
+    document.body.style.removeProperty('overflow')
+    document.body.style.removeProperty('padding-right')
+  }, { once: true })
+}
 
-const newMenu = ref({
-    language: '',
-    status: '',
-    title: '',
-    description: '',
-    restaurant: 'Hotel Resort Ejemplo',
-    startTime: '',
-    endTime: ''
-});
+watch(activeTab, (tab) => {
+  if (tab === 'categories') menusStore.fetchCategories()
+  else menusStore.fetchItems()
+})
 
-// Mock Data
-const menus = ref([
-  {
-    id: 1,
-    title: "2. Drinks / Bebidas",
-    description: "Bebidas alcohólicas y no alcohólicas",
-    status: "Active",
-  },
-  {
-    id: 2,
-    title: "6. Technical Assistance",
-    description: "Support services",
-    status: "Active",
-  },
-  {
-    id: 3,
-    title: "7. Complaints and Claims",
-    description: "Customer feedback channel",
-    status: "Active",
-  },
-   {
-    id: 4,
-    title: "1. Need Mice en Place",
-    description: "Preparation list",
-    status: "Active",
-  },
-]);
+// Categories
+const addCatForm  = ref({ name: '', description: '', sort_order: 0 })
+const addCatError = ref('')
 
-const addMenu = () => {
-    // Logic to add menu would go here (e.g., API call)
-    // For now, just a console log and maybe close modal (if using bootstrap js correctly)
-    console.log("Adding menu:", newMenu.value);
-    
-    // Simulate adding to list
-    menus.value.unshift({
-        id: Date.now(),
-        title: newMenu.value.title || "New Menu",
-        description: newMenu.value.description || "No description",
-        status: newMenu.value.status || "Inactive"
-    });
+async function submitAddCat() {
+  addCatError.value = ''
+  if (!addCatForm.value.name.trim()) { addCatError.value = 'Name is required.'; return }
+  const res = await menusStore.createCategory({ ...addCatForm.value })
+  if (res.success) { addCatForm.value = { name: '', description: '', sort_order: 0 }; closeModal('addCatModal') }
+  else addCatError.value = res.message
+}
 
-    // Reset form
-    newMenu.value = {
-        language: '',
-        status: '',
-        title: '',
-        description: '',
-        restaurant: 'Hotel Resort Ejemplo',
-        startTime: '',
-        endTime: ''
-    };
-    
-    // In a real app, we'd close the modal programmatically here
-};
+const editCatForm  = ref({})
+const editCatError = ref('')
+
+function openEditCat(c) {
+  editCatForm.value = { id: c.id, name: c.name, description: c.description || '', sort_order: c.sort_order, status: c.status }
+  editCatError.value = ''
+  new Modal(document.getElementById('editCatModal')).show()
+}
+
+async function submitEditCat() {
+  editCatError.value = ''
+  if (!editCatForm.value.name?.trim()) { editCatError.value = 'Name is required.'; return }
+  const res = await menusStore.updateCategory({ ...editCatForm.value })
+  if (res.success) closeModal('editCatModal')
+  else editCatError.value = res.message
+}
+
+// Items
+const addItemForm  = ref({ name: '', category_id: '', description: '', price: 0 })
+const addItemError = ref('')
+
+async function submitAddItem() {
+  addItemError.value = ''
+  if (!addItemForm.value.name.trim()) { addItemError.value = 'Name is required.'; return }
+  const res = await menusStore.createItem({ ...addItemForm.value })
+  if (res.success) { addItemForm.value = { name: '', category_id: '', description: '', price: 0 }; closeModal('addItemModal') }
+  else addItemError.value = res.message
+}
+
+const editItemForm  = ref({})
+const editItemError = ref('')
+
+function openEditItem(it) {
+  editItemForm.value = { id: it.id, name: it.name, category_id: it.category_id, description: it.description || '', price: it.price, status: it.status }
+  editItemError.value = ''
+  new Modal(document.getElementById('editItemModal')).show()
+}
+
+async function submitEditItem() {
+  editItemError.value = ''
+  if (!editItemForm.value.name?.trim()) { editItemError.value = 'Name is required.'; return }
+  const res = await menusStore.updateItem({ ...editItemForm.value })
+  if (res.success) closeModal('editItemModal')
+  else editItemError.value = res.message
+}
+
+onMounted(() => {
+  menusStore.fetchCategories()
+  menusStore.fetchItems()
+})
 </script>
-
-<style scoped>
-.bg-custom-blue {
-  background-color: #1a237e; /* Dark blue from screenshot/MainLayout */
-  border-color: #1a237e;
-}
-
-.btn-primary:hover {
-    background-color: #0d165f;
-    border-color: #0d165f;
-}
-
-.btn-search {
-  background-color: #1a237e;
-  border-color: #1a237e;
-}
-
-.text-custom-blue {
-    color: #1a237e;
-}
-
-.table thead th {
-  letter-spacing: 0.5px;
-}
-
-.form-control:focus, .form-select:focus {
-  border-color: #1a237e;
-  box-shadow: 0 0 0 0.25rem rgba(26, 35, 126, 0.25);
-}
-
-/* Modal styling adjustments */
-.modal-content {
-    border-radius: 10px;
-}
-</style>

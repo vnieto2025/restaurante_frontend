@@ -21,18 +21,20 @@
       >
         <i class="fas fa-map-marker-alt me-2"></i>Places
       </router-link>
-      <a
-        href="#"
+      <router-link
+        to="/customers"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-users me-2"></i>Customers
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/orders"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-clipboard-list me-2"></i>Orders
-      </a>
+      </router-link>
       <router-link
         to="/menus"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
@@ -40,54 +42,62 @@
       >
         <i class="fas fa-book-open me-2"></i>Menus
       </router-link>
-      <a
-        href="#"
+      <router-link
+        to="/ingredients"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-carrot me-2"></i>Ingredients
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/recipes"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-utensil-spoon me-2"></i>Recipes
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/subscriptions"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-bell me-2"></i>Subscriptions
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/reports"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-chart-bar me-2"></i>Reports
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/locations"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-location-arrow me-2"></i>Locations
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/venues"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-store me-2"></i>Venues
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/roles"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white"
+        active-class="active text-white"
       >
         <i class="fas fa-user-shield me-2"></i>Role Management
-      </a>
-      <a
-        href="#"
+      </router-link>
+      <router-link
+        to="/settings"
         class="list-group-item list-group-item-action bg-transparent text-white-50 hover-text-white mt-auto"
+        active-class="active text-white"
       >
         <i class="fas fa-cog me-2"></i>Settings
-      </a>
+      </router-link>
       <a
         href="#"
         @click.prevent="logout"
@@ -101,12 +111,13 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth.js";
 
-const router = useRouter();
+const router   = useRouter();
+const authStore = useAuthStore();
 
 const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("username");
+  authStore.logout();
   router.push("/");
 };
 </script>
